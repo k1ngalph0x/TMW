@@ -119,9 +119,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: screenHeight,
                   width: screenWidth,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Text('Select todays workout'),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Text(
+                        'Select todays workout',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20.0),
+                      ),
                       DropdownButton(
                         items: _workoutlist
                             .map<DropdownMenuItem<String>>((String value) {
