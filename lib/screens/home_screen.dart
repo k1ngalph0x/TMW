@@ -72,34 +72,21 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icon(Icons.add), label: 'Home', backgroundColor: Colors.red)
   ];
 
+  List<String> _workoutlist = <String>['Chest', 'Abs', 'Calves', 'Leg'];
+
+  String? selectedValue;
+
+  final _formKey = GlobalKey<FormState>();
+
   void _onTap(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-//   Future<T?> showModalBottomSheet<T>(
-// {required BuildContext context,
-// required WidgetBuilder builder,
-// Color? backgroundColor,
-// String? barrierLabel,
-// double? elevation,
-// ShapeBorder? shape,
-// Clip? clipBehavior,
-// BoxConstraints? constraints,
-// Color? barrierColor,
-// bool isScrollControlled = false,
-// double scrollControlDisabledMaxHeightRatio = _defaultScrollControlDisabledMaxHeightRatio,
-// bool useRootNavigator = false,
-// bool isDismissible = true,
-// bool enableDrag = true,
-// bool? showDragHandle,
-// bool useSafeArea = false,
-// RouteSettings? routeSettings,
-// AnimationController? transitionAnimationController,
-// Offset? anchorPoint,
-// AnimationStyle? sheetAnimationStyle}
-// )
+  void listItems(String? value) {
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,14 +113,34 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Text('Add workout'),
           onPressed: () {
             showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  return Container(
-                    height: screenHeight,
-                    width: screenWidth,
-                    child: Text('BottomModal'),
-                  );
-                });
+              context: context,
+              builder: (BuildContext context) {
+                return Container(
+                  height: screenHeight,
+                  width: screenWidth,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text('Select todays workout'),
+                      DropdownButton(
+                        items: _workoutlist
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                              value: value, child: Text(value));
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedValue = newValue;
+                          });
+                        },
+                      )
+                    ],
+                  ),
+                );
+              },
+            );
+
+            ///////////////
           },
         ),
       ),
