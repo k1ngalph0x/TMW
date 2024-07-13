@@ -1,6 +1,9 @@
 // import 'package:flutter/material.dart';
 // import 'package:fl_chart/fl_chart.dart';
+// import 'package:intl/intl.dart';
 // import 'package:multi_select_flutter/multi_select_flutter.dart';
+
+// import '../models/workout_model.dart';
 
 // class HomeScreen extends StatefulWidget {
 //   const HomeScreen({super.key});
@@ -13,6 +16,7 @@
 //   int _selectedIndex = 0;
 //   List<String> _selectedWorkouts = [];
 //   DateTime _selectedDateTime = DateTime.now();
+//   List<Workout> _savedWorkouts = [];
 
 //   List<BottomNavigationBarItem> _bottomNavbarItems = [
 //     BottomNavigationBarItem(
@@ -37,18 +41,29 @@
 
 //   final _formKey = GlobalKey<FormState>();
 
-//   final ButtonStyle elevatedButtonStyle = ElevatedButton.styleFrom(
-//   primary: Colors.red[700],
-//   onPrimary: Colors.white,
-//   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-//   shape: RoundedRectangleBorder(
-//     borderRadius: BorderRadius.circular(8),
-//   ),
-// );
+//   String _formatDateTime(DateTime dateTime) {
+//     return DateFormat('MMMM d, y - h:mm a').format(dateTime);
+//   }
 
 //   void _onTap(int index) {
 //     setState(() {
 //       _selectedIndex = index;
+//     });
+//   }
+
+//   final ButtonStyle elevatedButtonStyle = ElevatedButton.styleFrom(
+//     backgroundColor: Colors.red[700],
+//     foregroundColor: Colors.white,
+//     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+//     shape: RoundedRectangleBorder(
+//       borderRadius: BorderRadius.circular(8),
+//     ),
+//   );
+
+//   void _clearSelections() {
+//     setState(() {
+//       _selectedWorkouts.clear();
+//       _selectedDateTime = DateTime.now();
 //     });
 //   }
 
@@ -98,99 +113,212 @@
 //         onTap: _onTap,
 //         selectedItemColor: Colors.red[700],
 //       ),
-//       body: Center(
-//         child: ElevatedButton(
-//           child: Text('Add workout'),
-//           onPressed: () {
-//             showModalBottomSheet(
-//               context: context,
-//               builder: (BuildContext context) {
-//                 return Container(
-//                   height: screenHeight,
-//                   width: screenWidth,
-//                   child: Column(
-//                     children: [
-//                       SizedBox(height: 10.0),
-//                       Text(
-//                         'Select today\'s workouts',
-//                         style: TextStyle(
-//                             fontWeight: FontWeight.bold, fontSize: 20.0),
+//       body: Column(
+//         children: [
+//           // Expanded(
+//           //   child: ListView.builder(
+//           //     itemCount: _savedWorkouts.length,
+//           //     itemBuilder: (context, index) {
+//           //       final workout = _savedWorkouts[index];
+//           //       return Card(
+//           //         margin: EdgeInsets.all(8),
+//           //         child: ListTile(
+//           //           title: Text(
+//           //             DateFormat('EEEE').format(workout.dateTime),
+//           //             style: TextStyle(fontWeight: FontWeight.bold),
+//           //           ),
+//           //           subtitle: Text(workout.exercises.join(', ')),
+//           //           trailing:
+//           //               Text(DateFormat('MMM d').format(workout.dateTime)),
+//           //         ),
+//           //       );
+//           //     },
+//           //   ),
+//           // ),
+//           Expanded(
+//             child: ListView.builder(
+//               itemCount: _savedWorkouts.length,
+//               itemBuilder: (context, index) {
+//                 final workout = _savedWorkouts[index];
+//                 return Dismissible(
+//                   key: Key(workout.dateTime.toIso8601String()),
+//                   background: Container(
+//                     color: Colors.red,
+//                     alignment: Alignment.centerRight,
+//                     padding: EdgeInsets.only(right: 20.0),
+//                     child: Icon(Icons.delete, color: Colors.white),
+//                   ),
+//                   secondaryBackground: Container(
+//                     color: Colors.red,
+//                     alignment: Alignment.centerLeft,
+//                     padding: EdgeInsets.only(left: 20.0),
+//                     child: Icon(Icons.delete, color: Colors.white),
+//                   ),
+//                   // onDismissed: (direction) {
+//                   //   setState(() {
+//                   //     _savedWorkouts.removeAt(index);
+//                   //   });
+//                   //   ScaffoldMessenger.of(context).showSnackBar(
+//                   //     SnackBar(content: Text('Workout deleted')),
+//                   //   );
+//                   // },
+
+//                   confirmDismiss: (direction) async {
+//                     return await showDialog(
+//                       context: context,
+//                       builder: (BuildContext context) {
+//                         return AlertDialog(
+//                           title: const Text("Confirm"),
+//                           content: const Text(
+//                               "Are you sure you want to delete this workout?"),
+//                           actions: <Widget>[
+//                             TextButton(
+//                               onPressed: () => Navigator.of(context).pop(false),
+//                               child: const Text("CANCEL"),
+//                             ),
+//                             TextButton(
+//                               onPressed: () => Navigator.of(context).pop(true),
+//                               child: const Text("DELETE"),
+//                             ),
+//                           ],
+//                         );
+//                       },
+//                     );
+//                   },
+//                   onDismissed: (direction) {
+//                     setState(() {
+//                       _savedWorkouts.removeAt(index);
+//                     });
+//                     ScaffoldMessenger.of(context).showSnackBar(
+//                       SnackBar(content: Text('Workout deleted')),
+//                     );
+//                   },
+//                   child: Card(
+//                     margin: EdgeInsets.all(8),
+//                     child: ListTile(
+//                       title: Text(
+//                         DateFormat('EEEE').format(workout.dateTime),
+//                         style: TextStyle(fontWeight: FontWeight.bold),
 //                       ),
-//                       SizedBox(height: 20),
-//                       MultiSelectDialogField(
-//                         items: _workoutlist
-//                             .map((e) => MultiSelectItem(e, e))
-//                             .toList(),
-//                         listType: MultiSelectListType.CHIP,
-//                         onConfirm: (values) {
-//                           setState(() {
-//                             _selectedWorkouts = values.cast<String>();
-//                           });
-//                         },
-//                         chipDisplay: MultiSelectChipDisplay(
-//                           onTap: (value) {
-//                             setState(() {
-//                               _selectedWorkouts.remove(value);
-//                             });
-//                           },
-//                         ),
-//                         title: Text("Select workouts"),
-//                         selectedColor: Colors.red,
-//                         decoration: BoxDecoration(
-//                           color: Colors.red.withOpacity(0.1),
-//                           borderRadius: BorderRadius.all(Radius.circular(40)),
-//                           border: Border.all(
-//                             color: Colors.red,
-//                             width: 2,
-//                           ),
-//                         ),
-//                         buttonIcon: Icon(
-//                           Icons.pets,
-//                           color: Colors.red,
-//                         ),
-//                         buttonText: Text(
-//                           "Select Workouts",
-//                           style: TextStyle(
-//                             color: Colors.red[800],
-//                             fontSize: 16,
-//                           ),
-//                         ),
-//                       ),
-//                       SizedBox(height: 20),
-//                       Text(
-//                         'Selected Workouts: ${_selectedWorkouts.join(", ")}',
-//                         style: TextStyle(fontSize: 16),
-//                       ),
-//                       SizedBox(height: 20),
-//                       ElevatedButton(
-//                         onPressed: () => _selectDateTime(context),
-//                         child: Text('Select Date and Time'),
-//                       ),
-//                       SizedBox(height: 10),
-//                       Text(
-//                         'Selected Date and Time: ${_selectedDateTime.toString()}',
-//                         style: TextStyle(fontSize: 16),
-//                       ),
-//                       SizedBox(height: 20),
-//                       ElevatedButton(
-//                         onPressed: () {
-//                           // TODO: Implement save functionality
-//                           print(
-//                               'Saving workout: $_selectedWorkouts at $_selectedDateTime');
-//                           Navigator.pop(context);
-//                         },
-//                         child: Text('Save Workout'),
-//                       ),
-//                       SizedBox(height: 20),
-//                     ],
+//                       subtitle: Text(workout.exercises.join(', ')),
+//                       trailing:
+//                           Text(DateFormat('MMM d').format(workout.dateTime)),
+//                     ),
 //                   ),
 //                 );
 //               },
-//             );
+//             ),
+//           ),
+//           ElevatedButton(
+//             child: Text('Add workout'),
+//             onPressed: () {
+//               showModalBottomSheet(
+//                 context: context,
+//                 builder: (BuildContext context) {
+//                   return Container(
+//                       height: screenHeight,
+//                       width: screenWidth,
+//                       child: Column(
+//                         children: [
+//                           SizedBox(height: 10.0),
+//                           Text(
+//                             'Select today\'s workouts',
+//                             style: TextStyle(
+//                                 fontWeight: FontWeight.bold, fontSize: 20.0),
+//                           ),
+//                           SizedBox(height: 20),
+//                           MultiSelectDialogField(
+//                             items: _workoutlist
+//                                 .map((e) => MultiSelectItem(e, e))
+//                                 .toList(),
+//                             listType: MultiSelectListType.CHIP,
+//                             onConfirm: (values) {
+//                               setState(() {
+//                                 _selectedWorkouts = values.cast<String>();
+//                               });
+//                             },
+//                             chipDisplay: MultiSelectChipDisplay(
+//                               onTap: (value) {
+//                                 setState(() {
+//                                   _selectedWorkouts.remove(value);
+//                                 });
+//                               },
+//                             ),
+//                             title: Text("Select workouts"),
+//                             selectedColor: Colors.red,
+//                             decoration: BoxDecoration(
+//                               color: Colors.red.withOpacity(0.1),
+//                               borderRadius:
+//                                   BorderRadius.all(Radius.circular(40)),
+//                               border: Border.all(
+//                                 color: Colors.red,
+//                                 width: 2,
+//                               ),
+//                             ),
+//                             buttonIcon: Icon(
+//                               Icons.pets,
+//                               color: Colors.red,
+//                             ),
+//                             buttonText: Text(
+//                               "Select Workouts",
+//                               style: TextStyle(
+//                                 color: Colors.red[800],
+//                                 fontSize: 16,
+//                               ),
+//                             ),
+//                           ),
+//                           SizedBox(height: 20),
+//                           // Text(
+//                           //   'Selected Workouts:',
+//                           //   style: TextStyle(
+//                           //       fontSize: 18, fontWeight: FontWeight.bold),
+//                           // ),
+//                           // Text(
+//                           //   _selectedWorkouts.isEmpty
+//                           //       ? 'None'
+//                           //       : _selectedWorkouts.join(", "),
+//                           //   style: TextStyle(fontSize: 16),
+//                           // ),
+//                           SizedBox(height: 20),
+//                           ElevatedButton(
+//                             style: elevatedButtonStyle,
+//                             onPressed: () => _selectDateTime(context),
+//                             child: Text('Select Date and Time'),
+//                           ),
+//                           SizedBox(height: 10),
+//                           Text(
+//                             'Selected Date and Time:',
+//                             style: TextStyle(
+//                                 fontSize: 18, fontWeight: FontWeight.bold),
+//                           ),
+//                           Text(
+//                             _formatDateTime(_selectedDateTime),
+//                             style: TextStyle(fontSize: 16),
+//                           ),
+//                           SizedBox(height: 20),
+//                           ElevatedButton(
+//                             style: elevatedButtonStyle,
+//                             onPressed: () {
+//                               setState(() {
+//                                 _savedWorkouts.add(Workout(
+//                                   dateTime: _selectedDateTime,
+//                                   exercises: _selectedWorkouts,
+//                                 ));
+//                               });
+//                               Navigator.pop(context);
+//                             },
+//                             child: Text('Save Workout'),
+//                           ),
+//                           SizedBox(height: 20),
+//                         ],
+//                       ));
+//                 },
+//               );
 
-//             ///////////////
-//           },
-//         ),
+//               ///////////////
+//             },
+//           ),
+//         ],
 //       ),
 //     );
 //   }
@@ -199,6 +327,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+
+import '../models/workout_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -211,6 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   List<String> _selectedWorkouts = [];
   DateTime _selectedDateTime = DateTime.now();
+  List<Workout> _savedWorkouts = [];
 
   List<BottomNavigationBarItem> _bottomNavbarItems = [
     BottomNavigationBarItem(
@@ -245,6 +376,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _refreshState() {
+    setState(() {
+      // This empty setState will trigger a rebuild
+    });
+  }
+
   final ButtonStyle elevatedButtonStyle = ElevatedButton.styleFrom(
     backgroundColor: Colors.red[700],
     foregroundColor: Colors.white,
@@ -253,6 +390,37 @@ class _HomeScreenState extends State<HomeScreen> {
       borderRadius: BorderRadius.circular(8),
     ),
   );
+
+  void _clearSelections() {
+    _selectedWorkouts.clear();
+    _selectedDateTime = DateTime.now();
+  }
+
+  // Future<void> _selectDateTime(BuildContext context) async {
+  //   final DateTime? pickedDate = await showDatePicker(
+  //     context: context,
+  //     initialDate: _selectedDateTime,
+  //     firstDate: DateTime(2000),
+  //     lastDate: DateTime(2101),
+  //   );
+  //   if (pickedDate != null) {
+  //     final TimeOfDay? pickedTime = await showTimePicker(
+  //       context: context,
+  //       initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
+  //     );
+  //     if (pickedTime != null) {
+  //       setState(() {
+  //         _selectedDateTime = DateTime(
+  //           pickedDate.year,
+  //           pickedDate.month,
+  //           pickedDate.day,
+  //           pickedTime.hour,
+  //           pickedTime.minute,
+  //         );
+  //       });
+  //     }
+  //   }
+  // }
 
   Future<void> _selectDateTime(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
@@ -276,6 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
             pickedTime.minute,
           );
         });
+        _refreshState(); // Refresh the state
       }
     }
   }
@@ -300,112 +469,224 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onTap,
         selectedItemColor: Colors.red[700],
       ),
-      body: Center(
-        child: ElevatedButton(
-          child: Text('Add workout'),
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (BuildContext context) {
-                return Container(
-                    height: screenHeight,
-                    width: screenWidth,
-                    child: Column(
-                      children: [
-                        SizedBox(height: 10.0),
-                        Text(
-                          'Select today\'s workouts',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20.0),
-                        ),
-                        SizedBox(height: 20),
-                        MultiSelectDialogField(
-                          items: _workoutlist
-                              .map((e) => MultiSelectItem(e, e))
-                              .toList(),
-                          listType: MultiSelectListType.CHIP,
-                          onConfirm: (values) {
-                            setState(() {
-                              _selectedWorkouts = values.cast<String>();
-                            });
-                          },
-                          chipDisplay: MultiSelectChipDisplay(
-                            onTap: (value) {
+      body: Column(
+        children: [
+          // Expanded(
+          //   child: ListView.builder(
+          //     itemCount: _savedWorkouts.length,
+          //     itemBuilder: (context, index) {
+          //       final workout = _savedWorkouts[index];
+          //       return Card(
+          //         margin: EdgeInsets.all(8),
+          //         child: ListTile(
+          //           title: Text(
+          //             DateFormat('EEEE').format(workout.dateTime),
+          //             style: TextStyle(fontWeight: FontWeight.bold),
+          //           ),
+          //           subtitle: Text(workout.exercises.join(', ')),
+          //           trailing:
+          //               Text(DateFormat('MMM d').format(workout.dateTime)),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _savedWorkouts.length,
+              itemBuilder: (context, index) {
+                final workout = _savedWorkouts[index];
+                return Dismissible(
+                  key: Key(workout.dateTime.toIso8601String()),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.only(right: 20.0),
+                    child: Icon(Icons.delete, color: Colors.white),
+                  ),
+                  secondaryBackground: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.only(left: 20.0),
+                    child: Icon(Icons.delete, color: Colors.white),
+                  ),
+                  // onDismissed: (direction) {
+                  //   setState(() {
+                  //     _savedWorkouts.removeAt(index);
+                  //   });
+                  //   ScaffoldMessenger.of(context).showSnackBar(
+                  //     SnackBar(content: Text('Workout deleted')),
+                  //   );
+                  // },
+
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Confirm"),
+                          content: const Text(
+                              "Are you sure you want to delete this workout?"),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text("CANCEL"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text("DELETE"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  onDismissed: (direction) {
+                    setState(() {
+                      _savedWorkouts.removeAt(index);
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Workout deleted')),
+                    );
+                  },
+                  child: Card(
+                    margin: EdgeInsets.all(8),
+                    child: ListTile(
+                      title: Text(
+                        DateFormat('EEEE').format(workout.dateTime),
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(workout.exercises.join(', ')),
+                      trailing:
+                          Text(DateFormat('MMM d').format(workout.dateTime)),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          ElevatedButton(
+            child: Text('Add workout'),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return Container(
+                      height: screenHeight,
+                      width: screenWidth,
+                      child: Column(
+                        children: [
+                          SizedBox(height: 10.0),
+                          Text(
+                            'Select today\'s workouts',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20.0),
+                          ),
+                          SizedBox(height: 20),
+                          MultiSelectDialogField(
+                            items: _workoutlist
+                                .map((e) => MultiSelectItem(e, e))
+                                .toList(),
+                            listType: MultiSelectListType.CHIP,
+                            onConfirm: (values) {
                               setState(() {
-                                _selectedWorkouts.remove(value);
+                                _selectedWorkouts = values.cast<String>();
                               });
                             },
-                          ),
-                          title: Text("Select workouts"),
-                          selectedColor: Colors.red,
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
-                            borderRadius: BorderRadius.all(Radius.circular(40)),
-                            border: Border.all(
+                            chipDisplay: MultiSelectChipDisplay(
+                              onTap: (value) {
+                                setState(() {
+                                  _selectedWorkouts.remove(value);
+                                });
+                              },
+                            ),
+                            title: Text("Select workouts"),
+                            selectedColor: Colors.red,
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(40)),
+                              border: Border.all(
+                                color: Colors.red,
+                                width: 2,
+                              ),
+                            ),
+                            buttonIcon: Icon(
+                              Icons.pets,
                               color: Colors.red,
-                              width: 2,
+                            ),
+                            buttonText: Text(
+                              "Select Workouts",
+                              style: TextStyle(
+                                color: Colors.red[800],
+                                fontSize: 16,
+                              ),
                             ),
                           ),
-                          buttonIcon: Icon(
-                            Icons.pets,
-                            color: Colors.red,
+                          SizedBox(height: 20),
+                          // Text(
+                          //   'Selected Workouts:',
+                          //   style: TextStyle(
+                          //       fontSize: 18, fontWeight: FontWeight.bold),
+                          // ),
+                          // Text(
+                          //   _selectedWorkouts.isEmpty
+                          //       ? 'None'
+                          //       : _selectedWorkouts.join(", "),
+                          //   style: TextStyle(fontSize: 16),
+                          // ),
+                          SizedBox(height: 20),
+                          ElevatedButton(
+                            style: elevatedButtonStyle,
+                            onPressed: () => _selectDateTime(context),
+                            child: Text('Select Date and Time'),
                           ),
-                          buttonText: Text(
-                            "Select Workouts",
+                          SizedBox(height: 10),
+                          Text(
+                            'Selected Date and Time:',
                             style: TextStyle(
-                              color: Colors.red[800],
-                              fontSize: 16,
-                            ),
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        SizedBox(height: 20),
-                        // Text(
-                        //   'Selected Workouts:',
-                        //   style: TextStyle(
-                        //       fontSize: 18, fontWeight: FontWeight.bold),
-                        // ),
-                        // Text(
-                        //   _selectedWorkouts.isEmpty
-                        //       ? 'None'
-                        //       : _selectedWorkouts.join(", "),
-                        //   style: TextStyle(fontSize: 16),
-                        // ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          style: elevatedButtonStyle,
-                          onPressed: () => _selectDateTime(context),
-                          child: Text('Select Date and Time'),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          'Selected Date and Time:',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          _formatDateTime(_selectedDateTime),
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          style: elevatedButtonStyle,
-                          onPressed: () {
-                            // TODO: Implement save functionality
-                            print(
-                                'Saving workout: $_selectedWorkouts at $_selectedDateTime');
-                            Navigator.pop(context);
-                          },
-                          child: Text('Save Workout'),
-                        ),
-                        SizedBox(height: 20),
-                      ],
-                    ));
-              },
-            );
+                          Text(
+                            _formatDateTime(_selectedDateTime),
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          SizedBox(height: 20),
+                          ElevatedButton(
+                            style: elevatedButtonStyle,
+                            onPressed: () {
+                              if (_selectedWorkouts.isNotEmpty) {
+                                setState(() {
+                                  _savedWorkouts.add(Workout(
+                                    dateTime: _selectedDateTime,
+                                    exercises: List.from(
+                                        _selectedWorkouts), // Create a new list
+                                  ));
+                                  _clearSelections(); // Clear selections after saving
+                                });
+                                _refreshState(); // Refresh the state
+                                Navigator.pop(context);
+                              } else {
+                                // Show an error message if no workouts are selected
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'Please select at least one workout')),
+                                );
+                              }
+                            },
+                            child: Text('Save Workout'),
+                          ),
+                          SizedBox(height: 20),
+                        ],
+                      ));
+                },
+              );
 
-            ///////////////
-          },
-        ),
+              ///////////////
+            },
+          ),
+        ],
       ),
     );
   }
