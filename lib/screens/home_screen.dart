@@ -50,6 +50,7 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,6 +61,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  List<String> _selectedWorkouts = [];
 
   List<BottomNavigationBarItem> _bottomNavbarItems = [
     BottomNavigationBarItem(
@@ -72,7 +74,13 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icon(Icons.add), label: 'Home', backgroundColor: Colors.red)
   ];
 
-  List<String> _workoutlist = <String>['Chest', 'Abs', 'Calves', 'Leg'];
+  List<String> _workoutlist = <String>[
+    'Chest',
+    'Abs',
+    'Calves',
+    'Legs',
+    'Cross-fit'
+  ];
 
   String? selectedValue;
 
@@ -120,26 +128,57 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: screenWidth,
                   child: Column(
                     children: [
-                      SizedBox(
-                        height: 10.0,
-                      ),
+                      SizedBox(height: 10.0),
                       Text(
-                        'Select todays workout',
+                        'Select today\'s workouts',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 20.0),
                       ),
-                      DropdownButton(
+                      SizedBox(height: 20),
+                      MultiSelectDialogField(
                         items: _workoutlist
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                              value: value, child: Text(value));
-                        }).toList(),
-                        onChanged: (String? newValue) {
+                            .map((e) => MultiSelectItem(e, e))
+                            .toList(),
+                        listType: MultiSelectListType.CHIP,
+                        onConfirm: (values) {
                           setState(() {
-                            selectedValue = newValue;
+                            _selectedWorkouts = values.cast<String>();
                           });
                         },
-                      )
+                        chipDisplay: MultiSelectChipDisplay(
+                          onTap: (value) {
+                            setState(() {
+                              _selectedWorkouts.remove(value);
+                            });
+                          },
+                        ),
+                        title: Text("Select workouts"),
+                        selectedColor: Colors.red,
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.all(Radius.circular(40)),
+                          border: Border.all(
+                            color: Colors.red,
+                            width: 2,
+                          ),
+                        ),
+                        buttonIcon: Icon(
+                          Icons.pets,
+                          color: Colors.red,
+                        ),
+                        buttonText: Text(
+                          "Select Workouts",
+                          style: TextStyle(
+                            color: Colors.red[800],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Selected Workouts: ${_selectedWorkouts.join(", ")}',
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ],
                   ),
                 );
