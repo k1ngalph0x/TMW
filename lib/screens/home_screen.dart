@@ -296,8 +296,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:provider/provider.dart';
 import '../database/database_helper.dart';
 import '../models/workout_model.dart';
+import '../provider/workout_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -327,9 +329,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<String> _workoutlist = <String>[
     'Chest',
+    'Shoulders',
     'Abs',
-    'Calves',
+    'Hip',
     'Legs',
+    'Calves',
     'Cross-fit'
   ];
 
@@ -386,131 +390,141 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showAddWorkoutBottomSheet(BuildContext context) {
     showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: Container(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 20,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Select today\'s workouts',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
-                ),
-                SizedBox(height: 20),
-                MultiSelectDialogField(
-                  items:
-                      _workoutlist.map((e) => MultiSelectItem(e, e)).toList(),
-                  listType: MultiSelectListType.CHIP,
-                  onConfirm: (values) {
-                    setState(() {
-                      _selectedWorkouts = values.cast<String>();
-                    });
-                  },
-                  chipDisplay: MultiSelectChipDisplay(
-                    onTap: (value) {
-                      setState(() {
-                        _selectedWorkouts.remove(value);
-                      });
-                    },
+        context: context,
+        isScrollControlled: true,
+        builder: (BuildContext context) {
+          return Consumer<WorkoutProvider>(
+            builder: (context, workoutProvider, child) {
+              return SingleChildScrollView(
+                child: Container(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                    left: 20,
+                    right: 20,
+                    top: 20,
                   ),
-                  title: Text("Select workouts"),
-                  selectedColor: Colors.red,
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.all(Radius.circular(40)),
-                    border: Border.all(
-                      color: Colors.red,
-                      width: 2,
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Select today\'s workouts',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20.0),
+                      ),
+                      SizedBox(height: 20),
+                      MultiSelectDialogField(
+                        items: _workoutlist
+                            .map((e) => MultiSelectItem(e, e))
+                            .toList(),
+                        listType: MultiSelectListType.CHIP,
+                        onConfirm: (values) {
+                          setState(() {
+                            _selectedWorkouts = values.cast<String>();
+                          });
+                        },
+                        chipDisplay: MultiSelectChipDisplay(
+                          onTap: (value) {
+                            setState(() {
+                              _selectedWorkouts.remove(value);
+                            });
+                          },
+                        ),
+                        title: Text("Select workouts"),
+                        selectedColor: Colors.red,
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.all(Radius.circular(40)),
+                          border: Border.all(
+                            color: Colors.red,
+                            width: 2,
+                          ),
+                        ),
+                        buttonIcon: Icon(
+                          Icons.fitness_center,
+                          color: Colors.red,
+                        ),
+                        buttonText: Text(
+                          "Select Workouts",
+                          style: TextStyle(
+                            color: Colors.red[800],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        style: elevatedButtonStyle,
+                        onPressed: () => _selectDateTime(context),
+                        child: Text('Select Date and Time'),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Selected Date and Time:',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        _formatDateTime(_selectedDateTime),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 20),
+                      // ElevatedButton(
+                      //   style: elevatedButtonStyle,
+                      //   onPressed: () {
+                      //     if (_selectedWorkouts.isNotEmpty) {
+                      //       setState(() {
+                      //         _savedWorkouts.add(Workout(
+                      //           dateTime: _selectedDateTime,
+                      //           exercises: List.from(_selectedWorkouts),
+                      //         ));
+                      //         _clearSelections();
+                      //       });
+                      //       _refreshState();
+                      //       Navigator.pop(context);
+                      //     } else {
+                      //       ScaffoldMessenger.of(context).showSnackBar(
+                      //         SnackBar(
+                      //             content:
+                      //                 Text('Please select at least one workout')),
+                      //       );
+                      //     }
+                      //   },
+                      //   child: Text('Save Workout'),
+                      // ),
+                      ElevatedButton(
+                        style: elevatedButtonStyle,
+                        onPressed: () async {
+                          if (workoutProvider.selectedWorkouts.isNotEmpty) {
+                            final workout = Workout(
+                              dateTime: workoutProvider.selectedDateTime,
+                              exercises:
+                                  List.from(workoutProvider.selectedWorkouts),
+                            );
+                            // await DatabaseHelper.instance.insertWorkout(workout);
+                            // await _loadWorkouts(); // Reload workouts from database
+                            // _clearSelections();
+                            // Navigator.pop(context);
+                            await workoutProvider.addWorkout(workout);
+                            workoutProvider.clearSelections();
+                            Navigator.pop(context);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      'Please select at least one workout')),
+                            );
+                          }
+                        },
+                        child: Text('Save Workout'),
+                      ),
+                      SizedBox(height: 20),
+                    ],
                   ),
-                  buttonIcon: Icon(
-                    Icons.fitness_center,
-                    color: Colors.red,
-                  ),
-                  buttonText: Text(
-                    "Select Workouts",
-                    style: TextStyle(
-                      color: Colors.red[800],
-                      fontSize: 16,
-                    ),
-                  ),
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  style: elevatedButtonStyle,
-                  onPressed: () => _selectDateTime(context),
-                  child: Text('Select Date and Time'),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Selected Date and Time:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  _formatDateTime(_selectedDateTime),
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 20),
-                // ElevatedButton(
-                //   style: elevatedButtonStyle,
-                //   onPressed: () {
-                //     if (_selectedWorkouts.isNotEmpty) {
-                //       setState(() {
-                //         _savedWorkouts.add(Workout(
-                //           dateTime: _selectedDateTime,
-                //           exercises: List.from(_selectedWorkouts),
-                //         ));
-                //         _clearSelections();
-                //       });
-                //       _refreshState();
-                //       Navigator.pop(context);
-                //     } else {
-                //       ScaffoldMessenger.of(context).showSnackBar(
-                //         SnackBar(
-                //             content:
-                //                 Text('Please select at least one workout')),
-                //       );
-                //     }
-                //   },
-                //   child: Text('Save Workout'),
-                // ),
-                ElevatedButton(
-                  style: elevatedButtonStyle,
-                  onPressed: () async {
-                    if (_selectedWorkouts.isNotEmpty) {
-                      final workout = Workout(
-                        dateTime: _selectedDateTime,
-                        exercises: List.from(_selectedWorkouts),
-                      );
-                      await DatabaseHelper.instance.insertWorkout(workout);
-                      await _loadWorkouts(); // Reload workouts from database
-                      _clearSelections();
-                      Navigator.pop(context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content:
-                                Text('Please select at least one workout')),
-                      );
-                    }
-                  },
-                  child: Text('Save Workout'),
-                ),
-                SizedBox(height: 20),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+              );
+            },
+          );
+        });
   }
 
   @override
@@ -525,85 +539,89 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         elevation: 10.0,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _savedWorkouts.length,
-              itemBuilder: (context, index) {
-                final workout = _savedWorkouts[index];
-                return Dismissible(
-                  key: Key(workout.dateTime.toIso8601String()),
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20.0),
-                    child: Icon(Icons.delete, color: Colors.white),
-                  ),
-                  secondaryBackground: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.only(left: 20.0),
-                    child: Icon(Icons.delete, color: Colors.white),
-                  ),
-                  confirmDismiss: (direction) async {
-                    return await showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text("Confirm"),
-                          content: const Text(
-                              "Are you sure you want to delete this workout?"),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: const Text("CANCEL"),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text("DELETE"),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+      body: Consumer<WorkoutProvider>(
+        builder: (context, workoutProvider, child) {
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: workoutProvider.workouts.length,
+                  itemBuilder: (context, index) {
+                    final workout = _savedWorkouts[index];
+                    return Dismissible(
+                        key: Key(workout.dateTime.toIso8601String()),
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.only(right: 20.0),
+                          child: Icon(Icons.delete, color: Colors.white),
+                        ),
+                        secondaryBackground: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerLeft,
+                          padding: EdgeInsets.only(left: 20.0),
+                          child: Icon(Icons.delete, color: Colors.white),
+                        ),
+                        confirmDismiss: (direction) async {
+                          return await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Confirm"),
+                                content: const Text(
+                                    "Are you sure you want to delete this workout?"),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: const Text("CANCEL"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: const Text("DELETE"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        // onDismissed: (direction) {
+                        //   setState(() {
+                        //     _savedWorkouts.removeAt(index);
+                        //   });
+                        //   ScaffoldMessenger.of(context).showSnackBar(
+                        //     SnackBar(content: Text('Workout deleted')),
+                        //   );
+                        // },
+                        onDismissed: (direction) async {
+                          final deletedWorkout = _savedWorkouts[index];
+                          await DatabaseHelper.instance
+                              .deleteWorkout(deletedWorkout.id!);
+                          setState(() {
+                            _savedWorkouts.removeAt(index);
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Workout deleted')),
+                          );
+                        },
+                        child: Card(
+                            margin: EdgeInsets.all(8),
+                            child: ListTile(
+                              title: Text(
+                                DateFormat('EEEE').format(workout.dateTime),
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Text(workout.exercises.join(', ')),
+                              trailing: Text(
+                                  DateFormat('MMM d').format(workout.dateTime)),
+                            )));
                   },
-                  // onDismissed: (direction) {
-                  //   setState(() {
-                  //     _savedWorkouts.removeAt(index);
-                  //   });
-                  //   ScaffoldMessenger.of(context).showSnackBar(
-                  //     SnackBar(content: Text('Workout deleted')),
-                  //   );
-                  // },
-                  onDismissed: (direction) async {
-                    final deletedWorkout = _savedWorkouts[index];
-                    await DatabaseHelper.instance
-                        .deleteWorkout(deletedWorkout.id!);
-                    setState(() {
-                      _savedWorkouts.removeAt(index);
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Workout deleted')),
-                    );
-                  },
-                  child: Card(
-                    margin: EdgeInsets.all(8),
-                    child: ListTile(
-                      title: Text(
-                        DateFormat('EEEE').format(workout.dateTime),
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(workout.exercises.join(', ')),
-                      trailing:
-                          Text(DateFormat('MMM d').format(workout.dateTime)),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.red.shade50,
