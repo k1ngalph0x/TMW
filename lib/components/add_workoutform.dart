@@ -11,7 +11,7 @@ class AddWorkoutForm extends StatefulWidget {
 
 class _AddWorkoutFormState extends State<AddWorkoutForm> {
   final _formKey = GlobalKey<FormState>();
-  List<String> _selectedExercises = [];
+  final List<String> _selectedExercises = [];
   DateTime _selectedDateTime = DateTime.now();
 
   final List<String> _exerciseList = [
@@ -24,10 +24,10 @@ class _AddWorkoutFormState extends State<AddWorkoutForm> {
     'Cardio'
   ];
 
-  final Color _primaryColor = Color(0xFF1F1F1F);
+  final Color _primaryColor = const Color(0xFF1F1F1F);
   final Color _accentColor = Colors.purpleAccent;
-  final Color _backgroundColor = Color(0xFF121212);
-  final Color _surfaceColor = Color(0xFF2C2C2C);
+  final Color _backgroundColor = const Color(0xFF121212);
+  final Color _surfaceColor = const Color(0xFF2C2C2C);
   final Color _textColor = Colors.white;
 
   @override
@@ -43,10 +43,10 @@ class _AddWorkoutFormState extends State<AddWorkoutForm> {
       child: Container(
         decoration: BoxDecoration(
           color: _backgroundColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -62,7 +62,7 @@ class _AddWorkoutFormState extends State<AddWorkoutForm> {
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   'Add New Workout',
                   style: TextStyle(
@@ -71,9 +71,9 @@ class _AddWorkoutFormState extends State<AddWorkoutForm> {
                     color: _accentColor,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 _buildDateTimePicker(),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   'Select Exercises',
                   style: TextStyle(
@@ -82,9 +82,9 @@ class _AddWorkoutFormState extends State<AddWorkoutForm> {
                     color: _textColor,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 _buildExerciseSelector(),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 _buildSaveButton(),
               ],
             ),
@@ -122,7 +122,7 @@ class _AddWorkoutFormState extends State<AddWorkoutForm> {
         }
       },
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           color: _surfaceColor,
           borderRadius: BorderRadius.circular(8),
@@ -169,11 +169,10 @@ class _AddWorkoutFormState extends State<AddWorkoutForm> {
 
   Widget _buildSaveButton() {
     return ElevatedButton(
-      child: Text('Save Workout'),
       style: ElevatedButton.styleFrom(
         foregroundColor: _primaryColor,
         backgroundColor: _accentColor,
-        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
@@ -191,12 +190,13 @@ class _AddWorkoutFormState extends State<AddWorkoutForm> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Please select at least one exercise'),
+              content: const Text('Please select at least one exercise'),
               backgroundColor: _accentColor,
             ),
           );
         }
       },
+      child: const Text('Save Workout'),
     );
   }
 }

@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:provider/provider.dart';
-import '../provider/workout_provider.dart';
-import '../models/workout_model.dart';
-import 'package:intl/intl.dart';
 
-import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:provider/provider.dart';
-import '../provider/workout_provider.dart';
 import '../models/workout_model.dart';
 import 'package:intl/intl.dart';
 
@@ -62,13 +54,13 @@ class WorkoutBarChartScreen extends StatelessWidget {
               reservedSize: 30,
             ),
           ),
-          leftTitles: AxisTitles(
+          leftTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
-          topTitles: AxisTitles(
+          topTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
-          rightTitles: AxisTitles(
+          rightTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
         ),
